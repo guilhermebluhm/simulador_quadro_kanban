@@ -11,7 +11,9 @@ enum Status{
 struct Tarefa{
     id: usize,
     titulo: String,
-    status: Status
+    status: Status,
+    selecionado: bool,
+    comentarios: Vec<String>
 }
 
 #[derive(Debug)]
@@ -28,21 +30,29 @@ impl Default for MyApp{
                     id: 1,
                     titulo: "Configurar o eframe e egui".to_string(),
                     status: Status::Concluido,
+                    selecionado: false,
+                    comentarios: Vec::new()
                 },
                 Tarefa {
                     id: 2,
                     titulo: "Desenhar as 3 colunas do quadro".to_string(),
                     status: Status::Fazendo,
+                    selecionado: false,
+                    comentarios: Vec::new()
                 },
                 Tarefa {
                     id: 3,
                     titulo: "Criar a lógica de mover os cards".to_string(),
                     status: Status::Fazer,
+                    selecionado: false,
+                    comentarios: Vec::new()
                 },
                 Tarefa {
                     id: 4,
                     titulo: "Polimentos".to_string(),
-                    status: Status::Fazer, // Podemos ter mais de uma na mesma coluna
+                    status: Status::Fazer,
+                    selecionado: false,
+                    comentarios: Vec::new()
                 },
             ], input_nova_tarefa: String::new(), proximo_id: 5 }
     }
@@ -61,7 +71,9 @@ impl eframe::App for MyApp{
                     {
                         id: self.proximo_id, 
                         titulo: self.input_nova_tarefa.clone(), 
-                        status: Status::Fazer
+                        status: Status::Fazer,
+                        selecionado: false,
+                        comentarios: Vec::new()
                     });
                 self.proximo_id += 1;
                 self.input_nova_tarefa = String::new();
@@ -70,11 +82,21 @@ impl eframe::App for MyApp{
         });
 
         egui::CentralPanel::default().show(ctx, |ui|{
-            egui::ScrollArea::both().id_source("scroll_topo").show(ui, |scroll|{
+            egui::ScrollArea::both().hscroll(false).id_source("scroll_topo").show(ui, |scroll|{
                 scroll.columns(3, |col|{
 
                     col[0].vertical_centered(|col0|{
                         col0.heading("FAZER");
+                        for i in &mut self.tarefas{
+                            if col0.selectable_label(i.selecionado,&i.titulo).clicked() {
+                                if !i.selecionado {
+                                    i.selecionado = true;
+                                }
+                                else{
+                                    i.selecionado = false;
+                                }
+                            }
+                        }
                     });
 
                     col[1].vertical_centered(|col1|{
