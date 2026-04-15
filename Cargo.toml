@@ -1,0 +1,7 @@
+[package]
+name = "simulador_quadro_kanban"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+eframe = "0.27"
