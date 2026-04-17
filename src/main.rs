@@ -1,6 +1,6 @@
 use std::default;
 
-use eframe::egui::{self, Color32};
+use eframe::{egui::{self, Color32, Stroke, Vec2}, epaint::Shadow};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum Status{
@@ -68,6 +68,15 @@ impl Default for MyApp{
 impl eframe::App for MyApp{
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
 
+        let frame_topo = egui::Frame::default()
+            .fill(Color32::from_rgb(35, 45, 65))
+            .inner_margin(10.0)
+            .outer_margin(5.0);
+
+        egui::TopBottomPanel::top("frame_identificacao_window").frame(frame_topo).show(ctx, |top_frame|{
+            top_frame.heading("Rust + EGUI Development");
+        });
+
         egui::TopBottomPanel::top("adicao_nova_tarefa").show(ctx, |top|{
             top.separator();
             top.label(egui::RichText::new("Descrição nova tarefa").strong());
@@ -90,6 +99,21 @@ impl eframe::App for MyApp{
         });
 
         egui::CentralPanel::default().show(ctx, |ui|{
+
+            let frame_cards = egui::Frame::default()
+            .fill(Color32::from_rgb(30, 35, 45))
+            .rounding(8.0)
+            .stroke(Stroke::new(1.0, Color32::from_rgb(50, 55, 65)))
+            .inner_margin(12.0)
+            .shadow(Shadow 
+            { 
+                offset: Vec2::new(0.0, 4.0), 
+                blur: 10.0, 
+                spread: 0.0, 
+                color: Color32::from_black_alpha(120) 
+            })
+            .outer_margin(6.0);
+
             egui::ScrollArea::both().hscroll(false).id_source("scroll_topo").show(ui, |scroll|{
                 scroll.columns(3, |col|{
 
@@ -98,11 +122,14 @@ impl eframe::App for MyApp{
                         
                         for i in self.tarefas.iter_mut(){
                             if i.status == Status::Fazer{
-                                if col0.selectable_label(i.selecionado,&i.titulo).clicked() {
-                                    if !i.selecionado {
-                                        i.selecionado = true;
+                                frame_cards
+                                .show(col0, |card0|{
+                                    if card0.selectable_label(i.selecionado,&i.titulo).clicked() {
+                                        if !i.selecionado {
+                                            i.selecionado = true;
+                                        }
                                     }
-                                }
+                                });
                             }
                         }
                     });
@@ -111,11 +138,13 @@ impl eframe::App for MyApp{
                         col1.heading(egui::RichText::new("FAZENDO").color(Color32::DARK_GREEN).strong());
                         for i in self.tarefas.iter_mut(){
                             if i.status == Status::Fazendo{
-                                if col1.selectable_label(i.selecionado,&i.titulo).clicked() {
-                                    if !i.selecionado {
-                                        i.selecionado = true;
+                                frame_cards.show(col1, |card1|{
+                                    if card1.selectable_label(i.selecionado,&i.titulo).clicked() {
+                                        if !i.selecionado {
+                                            i.selecionado = true;
+                                        }
                                     }
-                                }
+                                });
                             }
                         }
                     });
@@ -124,11 +153,13 @@ impl eframe::App for MyApp{
                         col2.heading(egui::RichText::new("FEITO").color(Color32::BLUE).strong());
                         for i in self.tarefas.iter_mut(){
                             if i.status == Status::Concluido{
-                                if col2.selectable_label(i.selecionado,&i.titulo).clicked() {
-                                    if !i.selecionado {
-                                        i.selecionado = true;
+                                frame_cards.show(col2, |card2|{
+                                    if card2.selectable_label(i.selecionado,&i.titulo).clicked() {
+                                        if !i.selecionado {
+                                            i.selecionado = true;
+                                        }
                                     }
-                                }
+                                });
                             }
                         }
                     });
