@@ -2,7 +2,7 @@ use std::default;
 
 use eframe::egui::{self, Color32};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum Status{
     Fazer,
     Fazendo,
@@ -32,7 +32,7 @@ impl Default for MyApp{
                 Tarefa {
                     id: 1,
                     titulo: "Configurar o eframe e egui".to_string(),
-                    status: Status::Concluido,
+                    status: Status::Fazer,
                     selecionado: false,
                     comentarios: Vec::new(),
                     descricoes: String::new()
@@ -40,7 +40,7 @@ impl Default for MyApp{
                 Tarefa {
                     id: 2,
                     titulo: "Desenhar as 3 colunas do quadro".to_string(),
-                    status: Status::Fazendo,
+                    status: Status::Fazer,
                     selecionado: false,
                     comentarios: Vec::new(),
                     descricoes: String::new()
@@ -97,9 +97,11 @@ impl eframe::App for MyApp{
                         col0.heading(egui::RichText::new("FAZER").color(Color32::RED).strong());
                         
                         for i in self.tarefas.iter_mut(){
-                            if col0.selectable_label(i.selecionado,&i.titulo).clicked() {
-                                if !i.selecionado {
-                                    i.selecionado = true;
+                            if i.status == Status::Fazer{
+                                if col0.selectable_label(i.selecionado,&i.titulo).clicked() {
+                                    if !i.selecionado {
+                                        i.selecionado = true;
+                                    }
                                 }
                             }
                         }
@@ -107,12 +109,29 @@ impl eframe::App for MyApp{
 
                     col[1].vertical_centered(|col1|{
                         col1.heading(egui::RichText::new("FAZENDO").color(Color32::DARK_GREEN).strong());
+                        for i in self.tarefas.iter_mut(){
+                            if i.status == Status::Fazendo{
+                                if col1.selectable_label(i.selecionado,&i.titulo).clicked() {
+                                    if !i.selecionado {
+                                        i.selecionado = true;
+                                    }
+                                }
+                            }
+                        }
                     });
 
                     col[2].vertical_centered(|col2|{
                         col2.heading(egui::RichText::new("FEITO").color(Color32::BLUE).strong());
+                        for i in self.tarefas.iter_mut(){
+                            if i.status == Status::Concluido{
+                                if col2.selectable_label(i.selecionado,&i.titulo).clicked() {
+                                    if !i.selecionado {
+                                        i.selecionado = true;
+                                    }
+                                }
+                            }
+                        }
                     });
-
                 })
             });
 
@@ -127,10 +146,31 @@ impl eframe::App for MyApp{
                     fr.separator();
 
                     fr.text_edit_singleline(&mut x.descricoes);
-                    if fr.button("adicionar a lista de anotações").clicked() {
-                        x.comentarios.push(x.descricoes.clone());
-                        x.descricoes = String::new();
-                    }
+
+                    fr.columns(2, |card_col|{
+
+                        card_col[0].horizontal(|cl0|{
+                            if cl0.button("adicionar a lista de anotações").clicked() {
+                                x.comentarios.push(x.descricoes.clone());
+                                x.descricoes = String::new();
+                            }
+                        });
+
+                        card_col[1].horizontal(|cl1|{
+                            if x.status == Status::Fazer && !x.comentarios.is_empty() {
+                                if cl1.button("Alterar para Fazendo").clicked() {
+                                    x.status = Status::Fazendo;
+                                }
+                            }
+
+                            if x.status == Status::Fazendo {
+                                if cl1.button("Alterar para Feito").clicked() {
+                                    x.status = Status::Concluido;
+                                }
+                            }
+                        });
+
+                    });
 
                     fr.separator();
 
@@ -142,6 +182,21 @@ impl eframe::App for MyApp{
                             .color(Color32::RED)
                             .strong()
                             .size(22.0));
+                        });
+
+                    }
+                    else{
+
+                        fr.vertical_centered(|vertical_card|{
+                            
+                            vertical_card.horizontal(|hor_sect|{
+                                hor_sect.label(egui::RichText::new("Comentarios").color(Color32::RED).size(16.0).strong());
+                            });
+
+                            for i in &x.comentarios{
+                                vertical_card.label(i);
+                            }
+
                         });
 
                     }
